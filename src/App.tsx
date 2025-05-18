@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { 
   Container, 
   Typography, 
@@ -12,20 +12,52 @@ import {
   Paper,
   AppBar,
   Toolbar,
+  Tooltip,
 } from '@mui/material'
 import {
   Palette as ThemeIcon,
+  GitHub as GitHubIcon,
 } from '@mui/icons-material'
 import QuestionDisplay from './components/QuestionDisplay'
-import ThemeSelector, { themes, type ThemeOption } from './components/ThemeSelector'
+import ThemeSelector from './components/ThemeSelector'
+import ParticlesBackground from './components/ParticlesBackground'
+import { type ThemeOption, themes } from './themes'
 
 function App() {
   const [subject, setSubject] = useState<'math' | 'english' | null>(null)
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
-  const [selectedTheme, setSelectedTheme] = useState<ThemeOption>(
-    prefersDarkMode ? themes[3] : themes[0]
-  )
+  
+  // Initialize theme from localStorage or default
+  const [selectedTheme, setSelectedTheme] = useState<ThemeOption>(() => {
+    const savedTheme = localStorage.getItem('selectedTheme')
+    const savedCustomThemes = localStorage.getItem('customThemes')
+    
+    if (savedTheme) {
+      const parsedTheme = JSON.parse(savedTheme)
+      // If it's a custom theme, make sure it still exists in custom themes
+      if (savedCustomThemes) {
+        const customThemes = JSON.parse(savedCustomThemes)
+        const customTheme = customThemes.find((t: ThemeOption) => t.name === parsedTheme.name)
+        if (customTheme) {
+          return customTheme
+        }
+      }
+      // If it's a built-in theme, find it in the themes array
+      const builtInTheme = themes.find(t => t.name === parsedTheme.name)
+      if (builtInTheme) {
+        return builtInTheme
+      }
+    }
+    // Fall back to default theme based on system preference
+    return prefersDarkMode ? themes[3] : themes[0]
+  })
+
   const [themeDialogOpen, setThemeDialogOpen] = useState(false)
+
+  // Save theme to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('selectedTheme', JSON.stringify(selectedTheme))
+  }, [selectedTheme])
 
   const theme = useMemo(
     () => createTheme({
@@ -44,13 +76,18 @@ function App() {
       <Box
         sx={{
           minHeight: '100vh',
-          background: selectedTheme.background?.pattern
+          background: selectedTheme.background?.pattern && !selectedTheme.background?.particles?.enabled
             ? `${selectedTheme.background.default} ${selectedTheme.background.pattern}`
             : selectedTheme.background?.default,
           backgroundSize: '30px 30px',
           transition: 'background 0.3s ease-in-out',
+          position: 'relative',
         }}
       >
+        {selectedTheme.background?.particles?.enabled && (
+          <ParticlesBackground options={selectedTheme.background.particles.options} />
+        )}
+        
         <AppBar 
           position="sticky" 
           elevation={2}
@@ -59,6 +96,8 @@ function App() {
             color: 'text.primary',
             borderBottom: 1,
             borderColor: 'divider',
+            position: 'relative',
+            zIndex: 1,
           }}
         >
           <Toolbar>
@@ -72,17 +111,35 @@ function App() {
             >
               Jackson's SAT Practice
             </Typography>
-            <IconButton
-              onClick={() => setThemeDialogOpen(true)}
-              sx={{
-                color: 'text.primary',
-                '&:hover': {
-                  backgroundColor: 'action.hover',
-                },
-              }}
-            >
-              <ThemeIcon />
-            </IconButton>
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Tooltip title="View source on GitHub">
+                <IconButton
+                  component="a"
+                  href="https://github.com/Packjackisback/sat-practice-site"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  sx={{
+                    color: 'text.primary',
+                    '&:hover': {
+                      backgroundColor: 'action.hover',
+                    },
+                  }}
+                >
+                  <GitHubIcon />
+                </IconButton>
+              </Tooltip>
+              <IconButton
+                onClick={() => setThemeDialogOpen(true)}
+                sx={{
+                  color: 'text.primary',
+                  '&:hover': {
+                    backgroundColor: 'action.hover',
+                  },
+                }}
+              >
+                <ThemeIcon />
+              </IconButton>
+            </Box>
           </Toolbar>
         </AppBar>
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { 
   Box, 
   ToggleButton,
@@ -9,274 +9,13 @@ import {
   IconButton,
   Button,
   Divider,
+  Switch,
+  FormControlLabel,
 } from '@mui/material';
 import { Close as CloseIcon, Add as AddIcon, Edit as EditIcon, Delete as DeleteIcon } from '@mui/icons-material';
-import type { PaletteOptions } from '@mui/material/styles';
+import type { PaletteOptions, PaletteColor } from '@mui/material/styles';
 import ThemeEditor from './ThemeEditor';
-
-export interface ThemeOption {
-  name: string;
-  palette: PaletteOptions;
-  background: {
-    default: string;
-    pattern?: string;
-  };
-}
-
-const themes: ThemeOption[] = [
-  {
-    name: 'Gruvbox Light',
-    palette: {
-      mode: 'light',
-      primary: {
-        main: '#458588',
-        light: '#83A598',
-        dark: '#076678',
-      },
-      secondary: {
-        main: '#B8BB26',
-        light: '#98971A',
-        dark: '#79740E',
-      },
-      background: {
-        default: '#FBF1C7',
-        paper: '#F9F5D7',
-      },
-      text: {
-        primary: '#3C3836',
-        secondary: '#504945',
-      },
-    },
-    background: {
-      default: '#FBF1C7',
-      pattern: 'radial-gradient(circle at 1px 1px, #928374 1px, transparent 0) 0 0/40px 40px',
-    },
-  },
-  {
-    name: 'Gruvbox Dark',
-    palette: {
-      mode: 'dark',
-      primary: {
-        main: '#83A598',
-        light: '#8EC07C',
-        dark: '#689D6A',
-      },
-      secondary: {
-        main: '#B8BB26',
-        light: '#98971A',
-        dark: '#79740E',
-      },
-      background: {
-        default: '#282828',
-        paper: '#32302F',
-      },
-      text: {
-        primary: '#EBDBB2',
-        secondary: '#D5C4A1',
-      },
-    },
-    background: {
-      default: '#282828',
-      pattern: 'radial-gradient(circle at 1px 1px, #928374 1px, transparent 0) 0 0/40px 40px',
-    },
-  },
-  {
-    name: 'Catppuccin Mocha',
-    palette: {
-      mode: 'dark',
-      primary: {
-        main: '#89B4FA',
-        light: '#B4BEFE',
-        dark: '#738AAC',
-      },
-      secondary: {
-        main: '#F5C2E7',
-        light: '#F5C2E7',
-        dark: '#C69ECF',
-      },
-      background: {
-        default: '#1E1E2E',
-        paper: '#24273A',
-      },
-      text: {
-        primary: '#CDD6F4',
-        secondary: '#BAC2DE',
-      },
-    },
-    background: {
-      default: '#1E1E2E',
-      pattern: 'radial-gradient(circle at 1px 1px, #6C7086 1px, transparent 0) 0 0/40px 40px',
-    },
-  },
-  {
-    name: 'Catppuccin Latte',
-    palette: {
-      mode: 'light',
-      primary: {
-        main: '#7287FD',
-        light: '#8839EF',
-        dark: '#5B6078',
-      },
-      secondary: {
-        main: '#EA76CB',
-        light: '#DD7878',
-        dark: '#8839EF',
-      },
-      background: {
-        default: '#EFF1F5',
-        paper: '#F4F5F8',
-      },
-      text: {
-        primary: '#4C4F69',
-        secondary: '#5C5F77',
-      },
-    },
-    background: {
-      default: '#EFF1F5',
-      pattern: 'radial-gradient(circle at 1px 1px, #ACB0BE 1px, transparent 0) 0 0/40px 40px',
-    },
-  },
-  {
-    name: 'Nord',
-    palette: {
-      mode: 'dark',
-      primary: {
-        main: '#88C0D0',
-        light: '#8FBCBB',
-        dark: '#81A1C1',
-      },
-      secondary: {
-        main: '#B48EAD',
-        light: '#A3BE8C',
-        dark: '#BF616A',
-      },
-      background: {
-        default: '#2E3440',
-        paper: '#3B4252',
-      },
-      text: {
-        primary: '#ECEFF4',
-        secondary: '#E5E9F0',
-      },
-    },
-    background: {
-      default: '#2E3440',
-      pattern: 'radial-gradient(circle at 1px 1px, #4C566A 1px, transparent 0) 0 0/40px 40px',
-    },
-  },
-  {
-    name: 'Dracula',
-    palette: {
-      mode: 'dark',
-      primary: {
-        main: '#BD93F9',
-        light: '#FF79C6',
-        dark: '#6272A4',
-      },
-      secondary: {
-        main: '#50FA7B',
-        light: '#8BE9FD',
-        dark: '#FFB86C',
-      },
-      background: {
-        default: '#282A36',
-        paper: '#44475A',
-      },
-      text: {
-        primary: '#F8F8F2',
-        secondary: '#BFBFBF',
-      },
-    },
-    background: {
-      default: '#282A36',
-      pattern: 'radial-gradient(circle at 1px 1px, #6272A4 1px, transparent 0) 0 0/40px 40px',
-    },
-  },
-  {
-    name: 'Tokyo Night',
-    palette: {
-      mode: 'dark',
-      primary: {
-        main: '#7AA2F7',
-        light: '#2AC3DE',
-        dark: '#565F89',
-      },
-      secondary: {
-        main: '#BB9AF7',
-        light: '#7DCFFF',
-        dark: '#9AA5CE',
-      },
-      background: {
-        default: '#1A1B26',
-        paper: '#24283B',
-      },
-      text: {
-        primary: '#C0CAF5',
-        secondary: '#A9B1D6',
-      },
-    },
-    background: {
-      default: '#1A1B26',
-      pattern: 'radial-gradient(circle at 1px 1px, #565F89 1px, transparent 0) 0 0/40px 40px',
-    },
-  },
-  {
-    name: 'Solarized Light',
-    palette: {
-      mode: 'light',
-      primary: {
-        main: '#268BD2',
-        light: '#2AA198',
-        dark: '#6C71C4',
-      },
-      secondary: {
-        main: '#859900',
-        light: '#CB4B16',
-        dark: '#D33682',
-      },
-      background: {
-        default: '#FDF6E3',
-        paper: '#EEE8D5',
-      },
-      text: {
-        primary: '#073642',
-        secondary: '#586E75',
-      },
-    },
-    background: {
-      default: '#FDF6E3',
-      pattern: 'radial-gradient(circle at 1px 1px, #93A1A1 1px, transparent 0) 0 0/40px 40px',
-    },
-  },
-  {
-    name: 'One Dark',
-    palette: {
-      mode: 'dark',
-      primary: {
-        main: '#61AFEF',
-        light: '#56B6C2',
-        dark: '#528BFF',
-      },
-      secondary: {
-        main: '#98C379',
-        light: '#E5C07B',
-        dark: '#C678DD',
-      },
-      background: {
-        default: '#282C34',
-        paper: '#21252B',
-      },
-      text: {
-        primary: '#ABB2BF',
-        secondary: '#828997',
-      },
-    },
-    background: {
-      default: '#282C34',
-      pattern: 'radial-gradient(circle at 1px 1px, #4B5263 1px, transparent 0) 0 0/40px 40px',
-    },
-  },
-];
+import { type ThemeOption, themes as defaultThemes } from '../themes';
 
 interface ThemeSelectorProps {
   open: boolean;
@@ -286,29 +25,97 @@ interface ThemeSelectorProps {
 }
 
 export default function ThemeSelector({ open, onClose, currentTheme, onThemeChange }: ThemeSelectorProps) {
-  const [customThemes, setCustomThemes] = useState<ThemeOption[]>([]);
-  const [editorOpen, setEditorOpen] = useState(false);
-  const [editingTheme, setEditingTheme] = useState<ThemeOption | undefined>();
+  // Initialize custom themes from localStorage
+  const [customThemes, setCustomThemes] = useState<ThemeOption[]>(() => {
+    const saved = localStorage.getItem('customThemes')
+    return saved ? JSON.parse(saved) : []
+  })
+
+  // Initialize global particles state
+  const [globalParticlesEnabled, setGlobalParticlesEnabled] = useState(() => {
+    const saved = localStorage.getItem('globalParticlesEnabled')
+    return saved ? JSON.parse(saved) === true : false
+  })
+
+  const [editorOpen, setEditorOpen] = useState(false)
+  const [editingTheme, setEditingTheme] = useState<ThemeOption | undefined>()
+
+  // Save custom themes to localStorage whenever they change
+  useEffect(() => {
+    localStorage.setItem('customThemes', JSON.stringify(customThemes))
+  }, [customThemes])
+
+  // Save global particles state to localStorage
+  useEffect(() => {
+    localStorage.setItem('globalParticlesEnabled', JSON.stringify(globalParticlesEnabled))
+  }, [globalParticlesEnabled])
 
   const handleSaveTheme = (theme: ThemeOption) => {
     if (editingTheme) {
       setCustomThemes(prev => 
         prev.map(t => t.name === editingTheme.name ? theme : t)
-      );
+      )
     } else {
-      setCustomThemes(prev => [...prev, theme]);
+      setCustomThemes(prev => [...prev, theme])
     }
-    onThemeChange(theme);
-  };
+    onThemeChange(theme)
+  }
 
   const handleEditTheme = (theme: ThemeOption) => {
-    setEditingTheme(theme);
-    setEditorOpen(true);
-  };
+    setEditingTheme(theme)
+    setEditorOpen(true)
+  }
 
   const handleDeleteTheme = (themeName: string) => {
-    setCustomThemes(prev => prev.filter(t => t.name !== themeName));
-  };
+    setCustomThemes(prev => prev.filter(t => t.name !== themeName))
+    // If the deleted theme was selected, switch to the first built-in theme
+    if (currentTheme === themeName) {
+      onThemeChange(defaultThemes[0])
+    }
+  }
+
+  const handleParticlesToggle = (theme: ThemeOption) => {
+    if (theme.background.particles) {
+      const isCustomTheme = customThemes.some(t => t.name === theme.name)
+      
+      if (isCustomTheme) {
+        // Handle custom theme particles individually
+        const updatedTheme = {
+          ...theme,
+          background: {
+            ...theme.background,
+            particles: {
+              ...theme.background.particles,
+              enabled: !theme.background.particles.enabled
+            }
+          }
+        }
+        setCustomThemes(prev => 
+          prev.map(t => t.name === theme.name ? updatedTheme : t)
+        )
+        onThemeChange(updatedTheme)
+      } else {
+        // Handle preset theme particles globally
+        const newGlobalState = !globalParticlesEnabled
+        setGlobalParticlesEnabled(newGlobalState)
+        
+        // Update current theme if it's a preset theme
+        if (theme.name === currentTheme) {
+          const updatedTheme = {
+            ...theme,
+            background: {
+              ...theme.background,
+              particles: {
+                ...theme.background.particles,
+                enabled: newGlobalState
+              }
+            }
+          }
+          onThemeChange(updatedTheme)
+        }
+      }
+    }
+  }
 
   return (
     <>
@@ -354,8 +161,8 @@ export default function ThemeSelector({ open, onClose, currentTheme, onThemeChan
             <Button
               variant="outlined"
               onClick={() => {
-                setEditingTheme(undefined);
-                setEditorOpen(true);
+                setEditingTheme(undefined)
+                setEditorOpen(true)
               }}
               sx={{
                 height: '100%',
@@ -371,49 +178,74 @@ export default function ThemeSelector({ open, onClose, currentTheme, onThemeChan
               </Typography>
             </Button>
 
-            {themes.map((theme) => (
-              <ToggleButton
-                key={theme.name}
-                value={theme.name}
-                selected={currentTheme === theme.name}
-                onChange={() => {
-                  onThemeChange(theme);
-                  onClose();
-                }}
-                aria-label={theme.name}
-                sx={{
-                  p: 2,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 1,
-                  borderRadius: 1,
-                  borderColor: theme => theme.palette.divider,
-                  '&.Mui-selected': {
-                    backgroundColor: theme.palette.primary?.main || theme.palette.primary,
-                    color: '#fff',
-                    '&:hover': {
-                      backgroundColor: theme.palette.primary?.dark || theme.palette.primary,
-                    },
-                  },
-                }}
-              >
-                <Box
-                  sx={{
-                    width: '100%',
-                    height: 60,
-                    borderRadius: 1,
-                    background: theme.background?.pattern
-                      ? `${theme.background.default} ${theme.background.pattern}`
-                      : theme.background?.default,
-                    backgroundSize: '30px 30px',
-                    border: '1px solid',
-                    borderColor: 'divider',
+            {defaultThemes.map((theme) => (
+              <Box key={theme.name} sx={{ display: 'flex', flexDirection: 'column' }}>
+                <ToggleButton
+                  value={theme.name}
+                  selected={currentTheme === theme.name}
+                  onChange={() => {
+                    // Update theme with current global particles state when selecting
+                    const updatedTheme = {
+                      ...theme,
+                      background: {
+                        ...theme.background,
+                        particles: theme.background.particles ? {
+                          ...theme.background.particles,
+                          enabled: globalParticlesEnabled
+                        } : undefined
+                      }
+                    }
+                    onThemeChange(updatedTheme)
+                    onClose()
                   }}
-                />
-                <Typography variant="body2">
-                  {theme.name}
-                </Typography>
-              </ToggleButton>
+                  aria-label={theme.name}
+                  sx={{
+                    p: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 1,
+                    borderRadius: 1,
+                    borderColor: 'divider',
+                    '&.Mui-selected': {
+                      backgroundColor: (theme.palette.primary as PaletteColor)?.main || '#000',
+                      color: '#fff',
+                      '&:hover': {
+                        backgroundColor: (theme.palette.primary as PaletteColor)?.dark || '#000',
+                      },
+                    },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: '100%',
+                      height: 60,
+                      borderRadius: 1,
+                      background: theme.background.pattern
+                        ? `${theme.background.default} ${theme.background.pattern}`
+                        : theme.background.default,
+                      backgroundSize: '30px 30px',
+                      border: '1px solid',
+                      borderColor: 'divider',
+                    }}
+                  />
+                  <Typography variant="body2">
+                    {theme.name}
+                  </Typography>
+                </ToggleButton>
+                {theme.background.particles && (
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        size="small"
+                        checked={globalParticlesEnabled}
+                        onChange={() => handleParticlesToggle(theme)}
+                      />
+                    }
+                    label="Particles"
+                    sx={{ mt: 1 }}
+                  />
+                )}
+              </Box>
             ))}
 
             {customThemes.length > 0 && (
@@ -427,87 +259,101 @@ export default function ThemeSelector({ open, onClose, currentTheme, onThemeChan
                 </Box>
 
                 {customThemes.map((theme) => (
-                  <ToggleButton
-                    key={theme.name}
-                    value={theme.name}
-                    selected={currentTheme === theme.name}
-                    onChange={() => {
-                      onThemeChange(theme);
-                      onClose();
-                    }}
-                    aria-label={theme.name}
-                    sx={{
-                      p: 2,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 1,
-                      borderRadius: 1,
-                      borderColor: theme => theme.palette.divider,
-                      '&.Mui-selected': {
-                        backgroundColor: theme.palette.primary?.main || theme.palette.primary,
-                        color: '#fff',
-                        '&:hover': {
-                          backgroundColor: theme.palette.primary?.dark || theme.palette.primary,
-                        },
-                      },
-                    }}
-                  >
-                    <Box
+                  <Box key={theme.name} sx={{ display: 'flex', flexDirection: 'column' }}>
+                    <ToggleButton
+                      value={theme.name}
+                      selected={currentTheme === theme.name}
+                      onChange={() => {
+                        onThemeChange(theme)
+                        onClose()
+                      }}
+                      aria-label={theme.name}
                       sx={{
-                        width: '100%',
-                        height: 60,
+                        p: 2,
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 1,
                         borderRadius: 1,
-                        background: theme.background?.pattern
-                          ? `${theme.background.default} ${theme.background.pattern}`
-                          : theme.background?.default,
-                        backgroundSize: '30px 30px',
-                        border: '1px solid',
                         borderColor: 'divider',
-                        position: 'relative',
+                        '&.Mui-selected': {
+                          backgroundColor: (theme.palette.primary as PaletteColor)?.main || '#000',
+                          color: '#fff',
+                          '&:hover': {
+                            backgroundColor: (theme.palette.primary as PaletteColor)?.dark || '#000',
+                          },
+                        },
                       }}
                     >
                       <Box
                         sx={{
-                          position: 'absolute',
-                          top: 0,
-                          right: 0,
-                          display: 'flex',
-                          gap: 0.5,
-                          p: 0.5,
+                          width: '100%',
+                          height: 60,
+                          borderRadius: 1,
+                          background: theme.background.pattern
+                            ? `${theme.background.default} ${theme.background.pattern}`
+                            : theme.background.default,
+                          backgroundSize: '30px 30px',
+                          border: '1px solid',
+                          borderColor: 'divider',
+                          position: 'relative',
                         }}
                       >
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditTheme(theme);
-                          }}
+                        <Box
                           sx={{
-                            bgcolor: 'background.paper',
-                            '&:hover': { bgcolor: 'background.paper' },
+                            position: 'absolute',
+                            top: 0,
+                            right: 0,
+                            display: 'flex',
+                            gap: 0.5,
+                            p: 0.5,
                           }}
                         >
-                          <EditIcon sx={{ fontSize: 16 }} />
-                        </IconButton>
-                        <IconButton
-                          size="small"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteTheme(theme.name);
-                          }}
-                          sx={{
-                            bgcolor: 'background.paper',
-                            '&:hover': { bgcolor: 'background.paper' },
-                          }}
-                        >
-                          <DeleteIcon sx={{ fontSize: 16 }} />
-                        </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleEditTheme(theme)
+                            }}
+                            sx={{
+                              bgcolor: 'background.paper',
+                              '&:hover': { bgcolor: 'background.paper' },
+                            }}
+                          >
+                            <EditIcon sx={{ fontSize: 16 }} />
+                          </IconButton>
+                          <IconButton
+                            size="small"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleDeleteTheme(theme.name)
+                            }}
+                            sx={{
+                              bgcolor: 'background.paper',
+                              '&:hover': { bgcolor: 'background.paper' },
+                            }}
+                          >
+                            <DeleteIcon sx={{ fontSize: 16 }} />
+                          </IconButton>
+                        </Box>
                       </Box>
-                    </Box>
-                    <Typography variant="body2">
-                      {theme.name}
-                    </Typography>
-                  </ToggleButton>
+                      <Typography variant="body2">
+                        {theme.name}
+                      </Typography>
+                    </ToggleButton>
+                    {theme.background.particles && (
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            size="small"
+                            checked={theme.background.particles.enabled}
+                            onChange={() => handleParticlesToggle(theme)}
+                          />
+                        }
+                        label="Particles"
+                        sx={{ mt: 1 }}
+                      />
+                    )}
+                  </Box>
                 ))}
               </>
             )}
@@ -518,14 +364,12 @@ export default function ThemeSelector({ open, onClose, currentTheme, onThemeChan
       <ThemeEditor
         open={editorOpen}
         onClose={() => {
-          setEditorOpen(false);
-          setEditingTheme(undefined);
+          setEditorOpen(false)
+          setEditingTheme(undefined)
         }}
         onSave={handleSaveTheme}
         editingTheme={editingTheme}
       />
     </>
-  );
-}
-
-export { themes }; 
+  )
+} 

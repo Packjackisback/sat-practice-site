@@ -8,12 +8,16 @@ import {
   ButtonGroup,
   ToggleButton,
   CircularProgress,
-  Divider
+  Divider,
+  TextField,
+  IconButton,
+  Tooltip
 } from '@mui/material'
 import {
   NavigateBefore as PrevIcon,
   NavigateNext as NextIcon,
-  Check as CheckIcon
+  Check as CheckIcon,
+  KeyboardReturn as GoIcon
 } from '@mui/icons-material'
 import axios from 'axios'
 import 'katex/dist/katex.min.css'
@@ -57,6 +61,7 @@ const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
   const [selectedAnswer, setSelectedAnswer] = useState('')
   const [showExplanation, setShowExplanation] = useState(false)
   const [error, setError] = useState('')
+  const [jumpToQuestion, setJumpToQuestion] = useState('')
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -112,6 +117,19 @@ const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
     setShowExplanation(true)
   }
 
+  const handleJumpToQuestion = () => {
+    const questionNumber = parseInt(jumpToQuestion)
+    if (isNaN(questionNumber) || questionNumber < 1 || questionNumber > questions.length) {
+      setError(`Please enter a valid question number between 1 and ${questions.length}`)
+      return
+    }
+    setCurrentQuestionIndex(questionNumber - 1)
+    setSelectedAnswer('')
+    setShowExplanation(false)
+    setJumpToQuestion('')
+    setError('')
+  }
+
   if (error) {
     return <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
   }
@@ -126,14 +144,45 @@ const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
 
   return (
     <Paper elevation={2} sx={{ p: 4 }}>
-      <Box mb={3}>
-        <Typography variant="h6" gutterBottom>
+      <Box mb={3} sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+        <Typography variant="h6" sx={{ flexGrow: 1 }}>
           Question {currentQuestionIndex + 1} of {questions.length}
         </Typography>
-        <Typography variant="subtitle1" color="text.secondary">
-          Difficulty: {currentQuestion.difficulty}
-        </Typography>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <TextField
+            size="small"
+            label="Go to #"
+            value={jumpToQuestion}
+            onChange={(e) => {
+              setJumpToQuestion(e.target.value)
+              setError('')
+            }}
+            onKeyPress={(e) => {
+              if (e.key === 'Enter') {
+                handleJumpToQuestion()
+              }
+            }}
+            type="number"
+            inputProps={{
+              min: 1,
+              max: questions.length,
+              style: { width: '80px' }
+            }}
+          />
+          <Tooltip title="Go to question">
+            <IconButton
+              onClick={handleJumpToQuestion}
+              color="primary"
+              size="small"
+            >
+              <GoIcon />
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
+      <Typography variant="subtitle1" color="text.secondary" gutterBottom>
+        Difficulty: {currentQuestion.difficulty}
+      </Typography>
 
       {subject === 'english' && currentQuestion.question.paragraph && (
         <Box mb={4} sx={{ 

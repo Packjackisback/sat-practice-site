@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -14,15 +14,17 @@ import {
   Grid,
   Snackbar,
   Alert,
+  Switch,
+  FormControlLabel,
+  Slider,
 } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material';
-import type { ThemeOption } from './ThemeSelector';
+import type { ThemeOption } from '../themes';
+import type { PaletteOptions } from '@mui/material/styles';
 
 interface ColorSection {
   label: string;
-  colors: {
-    [key: string]: string;
-  };
+  colors: Record<string, string>;
 }
 
 interface ThemeEditorProps {
@@ -33,7 +35,7 @@ interface ThemeEditorProps {
 }
 
 const defaultTheme: ThemeOption = {
-  name: 'Custom Theme',
+  name: '',
   palette: {
     mode: 'light',
     primary: {
@@ -58,6 +60,67 @@ const defaultTheme: ThemeOption = {
   background: {
     default: '#ffffff',
     pattern: 'radial-gradient(circle at 1px 1px, #e0e0e0 1px, transparent 0) 0 0/40px 40px',
+    particles: {
+      enabled: false,
+      options: {
+        particles: {
+          color: {
+            value: '#000000'
+          },
+          links: {
+            color: '#000000',
+            enable: true,
+            opacity: 0.2,
+            distance: 150
+          },
+          move: {
+            enable: true,
+            speed: 1
+          },
+          size: {
+            value: 2
+          },
+          opacity: {
+            value: 0.3
+          },
+          number: {
+            value: 50,
+            density: {
+              enable: true,
+              area: 800
+            }
+          }
+        },
+        background: {
+          color: 'transparent'
+        },
+        detectRetina: true,
+        fpsLimit: 60,
+        interactivity: {
+          events: {
+            onHover: {
+              enable: true,
+              mode: 'grab'
+            },
+            onClick: {
+              enable: true,
+              mode: 'push'
+            }
+          },
+          modes: {
+            grab: {
+              distance: 200,
+              links: {
+                opacity: 0.3
+              }
+            },
+            push: {
+              quantity: 4
+            }
+          }
+        }
+      }
+    }
   },
 };
 
@@ -67,7 +130,13 @@ export default function ThemeEditor({ open, onClose, onSave, editingTheme }: The
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  const handleColorChange = (section: string, key: string, subKey: string, value: string) => {
+  useEffect(() => {
+    if (editingTheme) {
+      setTheme(editingTheme);
+    }
+  }, [editingTheme]);
+
+  const handleColorChange = (section: keyof PaletteOptions, key: string, subKey: string, value: string) => {
     setTheme(prev => ({
       ...prev,
       palette: {
@@ -77,6 +146,26 @@ export default function ThemeEditor({ open, onClose, onSave, editingTheme }: The
           [subKey]: value,
         },
       },
+    }));
+  };
+
+  const handleParticleChange = (key: string, value: any) => {
+    setTheme(prev => ({
+      ...prev,
+      background: {
+        ...prev.background,
+        particles: {
+          ...prev.background.particles,
+          enabled: prev.background.particles?.enabled ?? false,
+          options: {
+            ...prev.background.particles?.options,
+            particles: {
+              ...prev.background.particles?.options.particles,
+              [key]: value
+            }
+          }
+        }
+      }
     }));
   };
 
@@ -136,6 +225,15 @@ export default function ThemeEditor({ open, onClose, onSave, editingTheme }: The
     }
   };
 
+  const handleSave = () => {
+    if (!theme.name) {
+      alert('Please enter a theme name');
+      return;
+    }
+    onSave(theme);
+    onClose();
+  };
+
   return (
     <>
       <Dialog
@@ -173,6 +271,7 @@ export default function ThemeEditor({ open, onClose, onSave, editingTheme }: The
           >
             <Tab label="Colors" />
             <Tab label="Background" />
+            <Tab label="Particles" />
           </Tabs>
 
           {activeTab === 0 && (
@@ -190,14 +289,14 @@ export default function ThemeEditor({ open, onClose, onSave, editingTheme }: The
                           <input
                             type="color"
                             value={value}
-                            onChange={(e) => handleColorChange(section, key, subKey, e.target.value)}
+                            onChange={(e) => handleColorChange(section as keyof PaletteOptions, key, subKey, e.target.value)}
                             style={{ width: 40, height: 40, padding: 0, border: 'none' }}
                           />
                           <TextField
                             size="small"
                             label={key}
                             value={value}
-                            onChange={(e) => handleColorChange(section, key, subKey, e.target.value)}
+                            onChange={(e) => handleColorChange(section as keyof PaletteOptions, key, subKey, e.target.value)}
                             sx={{ flex: 1 }}
                           />
                         </Box>
@@ -210,22 +309,158 @@ export default function ThemeEditor({ open, onClose, onSave, editingTheme }: The
           )}
 
           {activeTab === 1 && (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <TextField
-                fullWidth
-                label="Background Pattern"
-                value={theme.background?.pattern || ''}
-                onChange={(e) => setTheme(prev => ({
-                  ...prev,
-                  background: {
-                    ...prev.background,
-                    pattern: e.target.value,
-                  },
-                }))}
-                multiline
-                rows={3}
-                helperText="CSS gradient pattern for the background"
+            <Box>
+              <Typography variant="subtitle2" gutterBottom>
+                Background Settings
+              </Typography>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <TextField
+                  label="Background Color"
+                  type="color"
+                  value={theme.background.default}
+                  onChange={(e) => setTheme(prev => ({
+                    ...prev,
+                    background: { ...prev.background, default: e.target.value }
+                  }))}
+                  fullWidth
+                />
+                <TextField
+                  label="Pattern"
+                  value={theme.background.pattern || ''}
+                  onChange={(e) => setTheme(prev => ({
+                    ...prev,
+                    background: { ...prev.background, pattern: e.target.value }
+                  }))}
+                  fullWidth
+                  multiline
+                />
+              </Box>
+            </Box>
+          )}
+
+          {activeTab === 2 && (
+            <Box>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={theme.background.particles?.enabled ?? false}
+                    onChange={(e) => setTheme(prev => ({
+                      ...prev,
+                      background: {
+                        ...prev.background,
+                        particles: {
+                          ...prev.background.particles,
+                          enabled: e.target.checked
+                        }
+                      }
+                    }))}
+                  />
+                }
+                label="Enable Particles"
               />
+
+              {theme.background.particles?.enabled && (
+                <Grid container spacing={3}>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Particle Settings
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      <TextField
+                        label="Particle Color"
+                        type="color"
+                        value={theme.background.particles.options.particles.color.value}
+                        onChange={(e) => handleParticleChange('color', { value: e.target.value })}
+                        fullWidth
+                      />
+                      <Box>
+                        <Typography gutterBottom>Number of Particles</Typography>
+                        <Slider
+                          value={theme.background.particles.options.particles.number.value}
+                          onChange={(_, value) => handleParticleChange('number', { 
+                            value: value as number,
+                            density: theme.background.particles.options.particles.number.density
+                          })}
+                          min={0}
+                          max={200}
+                          valueLabelDisplay="auto"
+                        />
+                      </Box>
+                      <Box>
+                        <Typography gutterBottom>Particle Size</Typography>
+                        <Slider
+                          value={theme.background.particles.options.particles.size.value}
+                          onChange={(_, value) => handleParticleChange('size', { value: value as number })}
+                          min={1}
+                          max={10}
+                          step={0.5}
+                          valueLabelDisplay="auto"
+                        />
+                      </Box>
+                    </Box>
+                  </Grid>
+                  <Grid item xs={12} md={6}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Link Settings
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={theme.background.particles.options.particles.links.enable}
+                            onChange={(e) => handleParticleChange('links', {
+                              ...theme.background.particles.options.particles.links,
+                              enable: e.target.checked
+                            })}
+                          />
+                        }
+                        label="Enable Links"
+                      />
+                      {theme.background.particles.options.particles.links.enable && (
+                        <>
+                          <TextField
+                            label="Link Color"
+                            type="color"
+                            value={theme.background.particles.options.particles.links.color}
+                            onChange={(e) => handleParticleChange('links', {
+                              ...theme.background.particles.options.particles.links,
+                              color: e.target.value
+                            })}
+                            fullWidth
+                          />
+                          <Box>
+                            <Typography gutterBottom>Link Opacity</Typography>
+                            <Slider
+                              value={theme.background.particles.options.particles.links.opacity}
+                              onChange={(_, value) => handleParticleChange('links', {
+                                ...theme.background.particles.options.particles.links,
+                                opacity: value as number
+                              })}
+                              min={0}
+                              max={1}
+                              step={0.1}
+                              valueLabelDisplay="auto"
+                            />
+                          </Box>
+                          <Box>
+                            <Typography gutterBottom>Link Distance</Typography>
+                            <Slider
+                              value={theme.background.particles.options.particles.links.distance}
+                              onChange={(_, value) => handleParticleChange('links', {
+                                ...theme.background.particles.options.particles.links,
+                                distance: value as number
+                              })}
+                              min={50}
+                              max={400}
+                              valueLabelDisplay="auto"
+                            />
+                          </Box>
+                        </>
+                      )}
+                    </Box>
+                  </Grid>
+                </Grid>
+              )}
             </Box>
           )}
         </DialogContent>
@@ -240,10 +475,7 @@ export default function ThemeEditor({ open, onClose, onSave, editingTheme }: The
           <Box sx={{ flex: 1 }} />
           <Button onClick={onClose}>Cancel</Button>
           <Button
-            onClick={() => {
-              onSave(theme);
-              onClose();
-            }}
+            onClick={handleSave}
             variant="contained"
           >
             Save Theme

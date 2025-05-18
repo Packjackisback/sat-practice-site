@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="240" fill="#458588"/>
+  
+  <!-- Calculator/Book shape -->
+  <rect x="136" y="112" width="240" height="288" rx="24" fill="white"/>
+  
+  <!-- Display screen -->
+  <rect x="156" y="142" width="200" height="60" rx="8" fill="#282828"/>
+  
+  <!-- Calculator buttons -->
+  <g fill="#458588">
+    <rect x="156" y="222" width="40" height="40" rx="8"/>
+    <rect x="206" y="222" width="40" height="40" rx="8"/>
+    <rect x="256" y="222" width="40" height="40" rx="8"/>
+    <rect x="306" y="222" width="40" height="40" rx="8"/>
+    
+    <rect x="156" y="272" width="40" height="40" rx="8"/>
+    <rect x="206" y="272" width="40" height="40" rx="8"/>
+    <rect x="256" y="272" width="40" height="40" rx="8"/>
+    <rect x="306" y="272" width="40" height="40" rx="8"/>
+    
+    <rect x="156" y="322" width="40" height="40" rx="8"/>
+    <rect x="206" y="322" width="40" height="40" rx="8"/>
+    <rect x="256" y="322" width="40" height="40" rx="8"/>
+    <rect x="306" y="322" width="40" height="40" rx="8"/>
+  </g>
+  
+  <!-- SAT text -->
+  <text x="256" y="178" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="white" text-anchor="middle">SAT</text>
+</svg> 

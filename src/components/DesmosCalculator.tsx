@@ -13,9 +13,41 @@ const MIN_HEIGHT = 400
 
 const DesmosCalculator = ({ onClose, isOpen }: DesmosCalculatorProps) => {
   const [size, setSize] = useState({ width: 400, height: 500 })
+  const [position, setPosition] = useState<{ x: number, y: number | string }>({ x: 20, y: '50%' })
   const [isResizing, setIsResizing] = useState(false)
+  const [isDragging, setIsDragging] = useState(false)
 
-  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+  const handleDragStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+
+    const startX = e.pageX
+    const startY = e.pageY
+    const startPosX = position.x
+    const startPosY = typeof position.y === 'string' ? window.innerHeight / 2 : position.y
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const deltaX = e.pageX - startX
+      const deltaY = e.pageY - startY
+      const newX = startPosX + deltaX
+      const newY = startPosY + deltaY
+      setPosition({ 
+        x: Math.max(0, Math.min(window.innerWidth - size.width, newX)),
+        y: Math.max(0, Math.min(window.innerHeight - size.height, newY))
+      })
+    }
+
+    const handleMouseUp = () => {
+      setIsDragging(false)
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }, [position, size])
+
+  const handleResizeStart = useCallback((e: React.MouseEvent) => {
     e.preventDefault()
     setIsResizing(true)
 
@@ -45,9 +77,10 @@ const DesmosCalculator = ({ onClose, isOpen }: DesmosCalculatorProps) => {
       elevation={4}
       sx={{
         position: 'fixed',
-        right: 20,
-        top: '50%',
-        transform: 'translateY(-50%)',
+        right: typeof position.x === 'number' ? 'auto' : position.x,
+        left: typeof position.x === 'number' ? position.x : 'auto',
+        top: position.y,
+        transform: typeof position.y === 'string' ? 'translateY(-50%)' : 'none',
         width: size.width,
         height: size.height,
         zIndex: 1000,
@@ -55,7 +88,8 @@ const DesmosCalculator = ({ onClose, isOpen }: DesmosCalculatorProps) => {
         flexDirection: 'column',
         overflow: 'hidden',
         resize: 'both',
-        transition: isResizing ? 'none' : 'width 0.2s, height 0.2s',
+        transition: (isResizing || isDragging) ? 'none' : 'width 0.2s, height 0.2s',
+        cursor: isDragging ? 'move' : 'default'
       }}
     >
       <Box
@@ -77,7 +111,7 @@ const DesmosCalculator = ({ onClose, isOpen }: DesmosCalculatorProps) => {
               backgroundColor: 'action.hover',
             },
           }}
-          onMouseDown={handleMouseDown}
+          onMouseDown={handleDragStart}
         >
           <DragIndicatorIcon />
         </IconButton>
@@ -122,7 +156,7 @@ const DesmosCalculator = ({ onClose, isOpen }: DesmosCalculatorProps) => {
             borderColor: 'text.disabled',
           },
         }}
-        onMouseDown={handleMouseDown}
+        onMouseDown={handleResizeStart}
       />
     </Paper>
   )

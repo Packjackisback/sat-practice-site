@@ -53,6 +53,12 @@ interface QuestionDisplayProps {
 
 const formatQuestionText = (text: string): string => {
   text = text.replace(/\*/g, '')
+  
+  if (text === text.toUpperCase() && text !== text.toLowerCase()) {
+    text = text.toLowerCase()
+    text = text.replace(/(^\w|\.\s+\w)/g, letter => letter.toUpperCase())
+  }
+  
   return text
 }
 
@@ -237,6 +243,7 @@ const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
                 py: 1.5,
                 px: 2,
                 gap: 2,
+                textTransform: 'none',
               }}
             >
               <Typography component="span" sx={{ minWidth: '24px' }}>

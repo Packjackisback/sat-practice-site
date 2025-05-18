@@ -1,96 +1,44 @@
-import { useEffect, useRef } from 'react'
+import { useState, useCallback } from 'react'
 import { Box, IconButton, Paper } from '@mui/material'
 import { Close as CloseIcon } from '@mui/icons-material'
-
-declare global {
-  interface Window {
-    Desmos: {
-      GraphingCalculator: (
-        container: HTMLElement,
-        options?: {
-          administeringTest?: boolean
-          lockViewport?: boolean
-          trace?: boolean
-          showResetButtonOnGraphpaper?: boolean
-          graphpaper?: boolean
-          expressions?: boolean
-          settingsMenu?: boolean
-          zoomButtons?: boolean
-          pointsOfInterest?: boolean
-          border?: boolean
-          expressionsTopbar?: boolean
-          lockCalculator?: boolean
-          images?: boolean
-          folders?: boolean
-          notes?: boolean
-          sliders?: boolean
-          links?: boolean
-          distributions?: boolean
-          restrictedFunctions?: boolean
-          pasteGraphLink?: boolean
-          showGrid?: boolean
-          showXAxis?: boolean
-          showYAxis?: boolean
-          xAxisLabel?: string
-          yAxisLabel?: string
-          xAxisStep?: number
-          yAxisStep?: number
-        }
-      ) => {
-        destroy: () => void
-      }
-    }
-  }
-}
+import DragIndicatorIcon from '@mui/icons-material/DragIndicator'
 
 interface DesmosCalculatorProps {
   onClose: () => void
+  isOpen: boolean
 }
 
-const DesmosCalculator = ({ onClose }: DesmosCalculatorProps) => {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const calculatorRef = useRef<any>(null)
+const MIN_WIDTH = 300
+const MIN_HEIGHT = 400
 
-  useEffect(() => {
-    if (containerRef.current && !calculatorRef.current) {
-      // Create calculator instance with SAT-specific settings
-      calculatorRef.current = window.Desmos.GraphingCalculator(containerRef.current, {
-        administeringTest: true,
-        lockViewport: false,
-        trace: false,
-        showResetButtonOnGraphpaper: true,
-        graphpaper: true,
-        expressions: true,
-        settingsMenu: false,
-        zoomButtons: true,
-        pointsOfInterest: false,
-        border: true,
-        expressionsTopbar: true,
-        lockCalculator: false,
-        images: false,
-        folders: false,
-        notes: false,
-        sliders: false,
-        links: false,
-        distributions: false,
-        restrictedFunctions: true,
-        pasteGraphLink: false,
-        showGrid: true,
-        showXAxis: true,
-        showYAxis: true,
-        xAxisLabel: 'x',
-        yAxisLabel: 'y',
-        xAxisStep: 1,
-        yAxisStep: 1
-      })
+const DesmosCalculator = ({ onClose, isOpen }: DesmosCalculatorProps) => {
+  const [size, setSize] = useState({ width: 400, height: 500 })
+  const [isResizing, setIsResizing] = useState(false)
+
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    setIsResizing(true)
+
+    const startX = e.pageX
+    const startY = e.pageY
+    const startWidth = size.width
+    const startHeight = size.height
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const newWidth = Math.max(MIN_WIDTH, startWidth + e.pageX - startX)
+      const newHeight = Math.max(MIN_HEIGHT, startHeight + e.pageY - startY)
+      setSize({ width: newWidth, height: newHeight })
     }
 
-    return () => {
-      if (calculatorRef.current) {
-        calculatorRef.current.destroy()
-      }
+    const handleMouseUp = () => {
+      setIsResizing(false)
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [])
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+  }, [size])
 
   return (
     <Paper
@@ -100,35 +48,81 @@ const DesmosCalculator = ({ onClose }: DesmosCalculatorProps) => {
         right: 20,
         top: '50%',
         transform: 'translateY(-50%)',
-        width: 400,
-        height: 500,
+        width: size.width,
+        height: size.height,
         zIndex: 1000,
-        display: 'flex',
+        display: isOpen ? 'flex' : 'none',
         flexDirection: 'column',
-        overflow: 'hidden', // Prevent content overflow
+        overflow: 'hidden',
+        resize: 'both',
+        transition: isResizing ? 'none' : 'width 0.2s, height 0.2s',
       }}
     >
       <Box
         sx={{
           display: 'flex',
-          justifyContent: 'flex-end',
+          justifyContent: 'space-between',
+          alignItems: 'center',
           p: 0.5,
           bgcolor: 'background.paper',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
         }}
       >
+        <IconButton
+          size="small"
+          sx={{
+            cursor: 'move',
+            '&:hover': {
+              backgroundColor: 'action.hover',
+            },
+          }}
+          onMouseDown={handleMouseDown}
+        >
+          <DragIndicatorIcon />
+        </IconButton>
         <IconButton size="small" onClick={onClose}>
           <CloseIcon />
         </IconButton>
       </Box>
       <Box
-        ref={containerRef}
         sx={{
           flexGrow: 1,
-          '& > *': { // Target the Desmos container
-            height: '100% !important',
-            width: '100% !important',
+          '& > iframe': {
+            border: 'none',
+            width: '100%',
+            height: '100%',
           },
         }}
+      >
+        <iframe
+          src="https://www.desmos.com/testing/cb-sat-ap/graphing"
+          title="SAT Calculator"
+          allow="fullscreen"
+        />
+      </Box>
+      <Box
+        sx={{
+          position: 'absolute',
+          right: 0,
+          bottom: 0,
+          width: 20,
+          height: 20,
+          cursor: 'nwse-resize',
+          backgroundColor: 'transparent',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            right: 3,
+            bottom: 3,
+            width: 8,
+            height: 8,
+            borderRight: '2px solid',
+            borderBottom: '2px solid',
+            borderColor: 'text.disabled',
+          },
+        }}
+        onMouseDown={handleMouseDown}
       />
     </Paper>
   )

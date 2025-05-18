@@ -298,8 +298,8 @@ const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
         </Button>
       </Box>
 
-      {subject === 'math' && showCalculator && (
-        <DesmosCalculator onClose={() => setShowCalculator(false)} />
+      {subject === 'math' && (
+        <DesmosCalculator onClose={() => setShowCalculator(false)} isOpen={showCalculator} />
       )}
     </Paper>
   )

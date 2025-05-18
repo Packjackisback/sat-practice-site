@@ -49,10 +49,9 @@ interface QuestionDisplayProps {
   subject: 'math' | 'english'
 }
 
-// Function to convert markdown-style bold to LaTeX bold
-const convertBoldToLatex = (text: string): string => {
-  // Replace **text** with \textbf{text}
-  return text.replace(/\*\*(.*?)\*\*/g, '\\textbf{$1}')
+const formatQuestionText = (text: string): string => {
+  text = text.replace(/\*/g, '')
+  return text
 }
 
 const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
@@ -195,37 +194,46 @@ const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
             Passage:
           </Typography>
           <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.8 }}>
-            <Latex>{convertBoldToLatex(currentQuestion.question.paragraph)}</Latex>
+            <Latex>{formatQuestionText(currentQuestion.question.paragraph)}</Latex>
           </Typography>
         </Box>
       )}
 
       <Box mb={4}>
-        <Typography variant="body1">
-          <Latex>{convertBoldToLatex(currentQuestion.question.question)}</Latex>
+        <Typography variant="body1" gutterBottom>
+          <Latex>{formatQuestionText(currentQuestion.question.question)}</Latex>
         </Typography>
       </Box>
 
       <Box mb={4}>
-        {Object.entries(currentQuestion.question.choices).map(([key, value]) => (
-          <ToggleButton
-            key={key}
-            value={key}
-            selected={selectedAnswer === key}
-            onChange={() => setSelectedAnswer(key)}
-            fullWidth
-            sx={{
-              justifyContent: 'flex-start',
-              mb: 1,
-              textTransform: 'none',
-              py: 1.5
-            }}
-          >
-            <Typography variant="body1">
-              <Latex>{convertBoldToLatex(`${key}. ${value}`)}</Latex>
-            </Typography>
-          </ToggleButton>
-        ))}
+        <ButtonGroup
+          orientation="vertical"
+          fullWidth
+          sx={{ gap: 1 }}
+        >
+          {Object.entries(currentQuestion.question.choices).map(([letter, choice]) => (
+            <ToggleButton
+              key={letter}
+              value={letter}
+              selected={selectedAnswer === letter}
+              onChange={() => setSelectedAnswer(letter)}
+              sx={{
+                justifyContent: 'flex-start',
+                textAlign: 'left',
+                py: 1.5,
+                px: 2,
+                gap: 2,
+              }}
+            >
+              <Typography component="span" sx={{ minWidth: '24px' }}>
+                {letter}.
+              </Typography>
+              <Typography component="span">
+                <Latex>{formatQuestionText(choice)}</Latex>
+              </Typography>
+            </ToggleButton>
+          ))}
+        </ButtonGroup>
       </Box>
 
       {showExplanation && (
@@ -241,7 +249,7 @@ const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
             Explanation:
           </Typography>
           <Typography variant="body1">
-            <Latex>{convertBoldToLatex(currentQuestion.question.explanation)}</Latex>
+            <Latex>{formatQuestionText(currentQuestion.question.explanation)}</Latex>
           </Typography>
         </Box>
       )}

@@ -17,11 +17,13 @@ import {
   NavigateBefore as PrevIcon,
   NavigateNext as NextIcon,
   Check as CheckIcon,
-  KeyboardReturn as GoIcon
+  KeyboardReturn as GoIcon,
+  Calculate as CalculatorIcon
 } from '@mui/icons-material'
 import axios from 'axios'
 import 'katex/dist/katex.min.css'
 import Latex from 'react-latex-next'
+import DesmosCalculator from './DesmosCalculator'
 
 interface Question {
   id: string
@@ -61,6 +63,7 @@ const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
   const [showExplanation, setShowExplanation] = useState(false)
   const [error, setError] = useState('')
   const [jumpToQuestion, setJumpToQuestion] = useState('')
+  const [showCalculator, setShowCalculator] = useState(false)
 
   useEffect(() => {
     const fetchQuestions = async () => {
@@ -148,6 +151,17 @@ const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
           Question {currentQuestionIndex + 1} of {questions.length}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          {subject === 'math' && (
+            <Tooltip title="Toggle Calculator">
+              <IconButton
+                onClick={() => setShowCalculator(prev => !prev)}
+                color={showCalculator ? 'primary' : 'default'}
+                size="small"
+              >
+                <CalculatorIcon />
+              </IconButton>
+            </Tooltip>
+          )}
           <TextField
             size="small"
             label="Go to #"
@@ -283,6 +297,10 @@ const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
           Next
         </Button>
       </Box>
+
+      {subject === 'math' && showCalculator && (
+        <DesmosCalculator onClose={() => setShowCalculator(false)} />
+      )}
     </Paper>
   )
 }

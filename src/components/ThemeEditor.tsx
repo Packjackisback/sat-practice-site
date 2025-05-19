@@ -128,7 +128,10 @@ export default function ThemeEditor({ open, onClose, onSave, editingTheme }: The
   const [theme, setTheme] = useState<ThemeOption>(editingTheme || defaultTheme);
   const [activeTab, setActiveTab] = useState(0);
   const [shareDialogOpen, setShareDialogOpen] = useState(false);
+  const [importDialogOpen, setImportDialogOpen] = useState(false);
+  const [importText, setImportText] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   useEffect(() => {
     if (editingTheme) {
@@ -205,23 +208,31 @@ export default function ThemeEditor({ open, onClose, onSave, editingTheme }: The
   const handleShare = () => {
     const themeString = JSON.stringify(theme, null, 2);
     navigator.clipboard.writeText(themeString);
+    setSnackbarMessage('Theme copied to clipboard!');
     setSnackbarOpen(true);
   };
 
   const handleImport = async () => {
     try {
-      const text = await navigator.clipboard.readText();
-      const importedTheme = JSON.parse(text);
+      const importedTheme = JSON.parse(importText);
       if (
         importedTheme.name &&
         importedTheme.palette &&
         importedTheme.background
       ) {
         setTheme(importedTheme);
+        setSnackbarMessage('Theme imported successfully!');
+        setSnackbarOpen(true);
+        setImportDialogOpen(false);
+        setImportText('');
+      } else {
+        setSnackbarMessage('Invalid theme format');
         setSnackbarOpen(true);
       }
     } catch (error) {
       console.error('Failed to import theme:', error);
+      setSnackbarMessage('Failed to import theme: Invalid JSON');
+      setSnackbarOpen(true);
     }
   };
 
@@ -466,7 +477,7 @@ export default function ThemeEditor({ open, onClose, onSave, editingTheme }: The
         </DialogContent>
 
         <DialogActions sx={{ p: 2, gap: 1 }}>
-          <Button onClick={handleImport} variant="outlined">
+          <Button onClick={() => setImportDialogOpen(true)} variant="outlined">
             Import
           </Button>
           <Button onClick={handleShare} variant="outlined">
@@ -483,13 +494,58 @@ export default function ThemeEditor({ open, onClose, onSave, editingTheme }: The
         </DialogActions>
       </Dialog>
 
+      <Dialog 
+        open={importDialogOpen} 
+        onClose={() => {
+          setImportDialogOpen(false);
+          setImportText('');
+        }}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Import Theme</DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 1 }}>
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Paste your theme JSON data below:
+            </Typography>
+            <TextField
+              multiline
+              rows={8}
+              fullWidth
+              value={importText}
+              onChange={(e) => setImportText(e.target.value)}
+              placeholder="Paste theme JSON here..."
+              sx={{ mt: 2 }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => {
+              setImportDialogOpen(false);
+              setImportText('');
+            }}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleImport}
+            variant="contained"
+            disabled={!importText.trim()}
+          >
+            Import
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Snackbar
         open={snackbarOpen}
         autoHideDuration={3000}
         onClose={() => setSnackbarOpen(false)}
       >
         <Alert severity="success" onClose={() => setSnackbarOpen(false)}>
-          {theme ? 'Theme imported successfully!' : 'Theme copied to clipboard!'}
+          {snackbarMessage}
         </Alert>
       </Snackbar>
     </>

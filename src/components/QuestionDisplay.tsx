@@ -20,10 +20,10 @@ import {
   KeyboardReturn as GoIcon,
   Calculate as CalculatorIcon
 } from '@mui/icons-material'
-import axios from 'axios'
 import 'katex/dist/katex.min.css'
 import Latex from 'react-latex-next'
 import DesmosCalculator from './DesmosCalculator'
+import questionsData from '../data/questions.json'
 
 interface Question {
   id: string
@@ -72,28 +72,20 @@ const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
   const [showCalculator, setShowCalculator] = useState(false)
 
   useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        const response = await axios.get('https://api.jsonsilo.com/public/942c3c3b-3a0c-4be3-81c2-12029def19f5')
-        console.log('API Response:', response.data)
-        const subjectQuestions = response.data[subject]
-        console.log('Subject Questions:', subjectQuestions)
-        if (!subjectQuestions || subjectQuestions.length === 0) {
-          setError(`No ${subject} questions available.`)
-          return
-        }
-        console.log('First Question:', subjectQuestions[0])
-        setQuestions(subjectQuestions)
-        setCurrentQuestionIndex(0)
-        setSelectedAnswer('')
-        setShowExplanation(false)
-      } catch (error) {
-        console.error('Error fetching questions:', error)
-        setError('Error fetching questions. Please try again later.')
+    try {
+      const subjectQuestions = questionsData[subject]
+      if (!subjectQuestions || subjectQuestions.length === 0) {
+        setError(`No ${subject} questions available.`)
+        return
       }
+      setQuestions(subjectQuestions)
+      setCurrentQuestionIndex(0)
+      setSelectedAnswer('')
+      setShowExplanation(false)
+    } catch (error) {
+      console.error('Error loading questions:', error)
+      setError('Error loading questions. Please try again later.')
     }
-
-    fetchQuestions()
   }, [subject])
 
   const currentQuestion = questions[currentQuestionIndex]

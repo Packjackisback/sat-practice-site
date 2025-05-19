@@ -46,12 +46,11 @@ The built files will be in the `dist` directory.
 - TypeScript
 - Vite
 - KaTeX (for LaTeX rendering)
-- Axios (for API requests)
+- Material UI
 
-## API
+## Data
 
-The application uses the JSON API at:
-`https://api.jsonsilo.com/public/942c3c3b-3a0c-4be3-81c2-12029def19f5`
+The application uses a local JSON file containing SAT practice questions. The questions data is stored in `src/data/questions.json`.
 
 Massive thanks for the OpenSAT team. This project would not be possible without their question bank.
 

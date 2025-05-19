@@ -40800,10 +40800,10 @@
           "A": "5\\sqrt{2}",
           "B": "10",
           "C": "5\\sqrt{3}",
-          "D": "7\\sqrt{2}"
+          "D": "\\sqrt{2}"
         },
-        "correct_answer": "A",
-        "explanation": "The equation of the circle with center at the origin and radius 5 is $x^2 + y^2 = 25$.  We can solve the system of equations $x^2 + y^2 = 25$ and $x + y = 7$ to find the points of intersection. Solving for $x$ in the second equation, we get $x = 7 - y$. Substituting this into the first equation, we get $(7-y)^2 + y^2 = 25$. Expanding the equation, we get $49 - 14y + y^2 + y^2 = 25$. Combining like terms, we get $2y^2 - 14y + 24 = 0$. Dividing both sides by 2, we get $y^2 - 7y + 12 = 0$. Factoring, we get $(y-3)(y-4) = 0$. Therefore, $y = 3$ or $y = 4$. Substituting these values back into the equation $x = 7 - y$, we get the points of intersection as $(4,3)$ and $(3,4)$. The distance between these two points can be found using the distance formula: $\\sqrt{(4-3)^2 + (3-4)^2} = \\sqrt{1+1} = \\sqrt{2}$.  Thus, the distance between the two points is $5\\sqrt{2}$.",
+        "correct_answer": "D",
+        "explanation": "The equation of the circle with center at the origin and radius 5 is $x^2 + y^2 = 25$.  We can solve the system of equations $x^2 + y^2 = 25$ and $x + y = 7$ to find the points of intersection. Solving for $x$ in the second equation, we get $x = 7 - y$. Substituting this into the first equation, we get $(7-y)^2 + y^2 = 25$. Expanding the equation, we get $49 - 14y + y^2 + y^2 = 25$. Combining like terms, we get $2y^2 - 14y + 24 = 0$. Dividing both sides by 2, we get $y^2 - 7y + 12 = 0$. Factoring, we get $(y-3)(y-4) = 0$. Therefore, $y = 3$ or $y = 4$. Substituting these values back into the equation $x = 7 - y$, we get the points of intersection as $(4,3)$ and $(3,4)$. The distance between these two points can be found using the distance formula: $\\sqrt{(4-3)^2 + (3-4)^2} = \\sqrt{1+1} = \\sqrt{2}$.  Thus, the distance between the two points is $\\sqrt{2}$.",
         "paragraph": "null",
         "question": "A circle with center at the origin and radius 5 intersects the line $x + y = 7$ at two points. What is the distance between these two points?"
       },

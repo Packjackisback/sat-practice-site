@@ -27,14 +27,12 @@ function App() {
   const [subject, setSubject] = useState<'math' | 'english' | null>(null)
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)')
   
-  // Initialize theme from localStorage or default
   const [selectedTheme, setSelectedTheme] = useState<ThemeOption>(() => {
     const savedTheme = localStorage.getItem('selectedTheme')
     const savedCustomThemes = localStorage.getItem('customThemes')
     
     if (savedTheme) {
       const parsedTheme = JSON.parse(savedTheme)
-      // If it's a custom theme, make sure it still exists in custom themes
       if (savedCustomThemes) {
         const customThemes = JSON.parse(savedCustomThemes)
         const customTheme = customThemes.find((t: ThemeOption) => t.name === parsedTheme.name)
@@ -42,19 +40,17 @@ function App() {
           return customTheme
         }
       }
-      // If it's a built-in theme, find it in the themes array
       const builtInTheme = themes.find(t => t.name === parsedTheme.name)
       if (builtInTheme) {
         return builtInTheme
       }
     }
-    // Fall back to default theme based on system preference
     return prefersDarkMode ? themes[3] : themes[0]
   })
 
   const [themeDialogOpen, setThemeDialogOpen] = useState(false)
 
-  // Save theme to localStorage whenever it changes
+  // save theme to localstorage
   useEffect(() => {
     localStorage.setItem('selectedTheme', JSON.stringify(selectedTheme))
   }, [selectedTheme])

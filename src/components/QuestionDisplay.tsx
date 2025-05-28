@@ -67,7 +67,7 @@ const formatQuestionText = (text: string): string => {
 }
 
 const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
-  const [flaggedQuestions, setFlaggedQuestions] = useState<Set<string>>(new Set())
+  const [showFlaggedPanel, setShowFlaggedPanel] = useState(false)
   const [questions, setQuestions] = useState<Question[]>([])
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState('')
@@ -75,7 +75,11 @@ const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
   const [error, setError] = useState('')
   const [jumpToQuestion, setJumpToQuestion] = useState('')
   const [showCalculator, setShowCalculator] = useState(false)
-  const [showFlaggedPanel, setShowFlaggedPanel] = useState(false)
+  const [flaggedQuestions, setFlaggedQuestions] = useState<Set<string>>(() => {
+    const saved = localStorage.getItem('flaggedQuestions')
+    return saved ? new Set(JSON.parse(saved)) : new Set()
+  })
+
   useEffect(() => {
     try {
       const subjectQuestions = questionsData[subject]
@@ -92,6 +96,11 @@ const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
       setError('Error loading questions. Please try again later.')
     }
   }, [subject])
+
+  useEffect(() => {
+    localStorage.setItem('flaggedQuestions', JSON.stringify(Array.from(flaggedQuestions)))
+  }, [flaggedQuestions])
+
 
   const currentQuestion = questions[currentQuestionIndex]
 

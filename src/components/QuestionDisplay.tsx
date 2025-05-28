@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { 
+import {
   Box, 
   Typography, 
   Button, 
@@ -11,18 +11,22 @@ import {
   Divider,
   TextField,
   IconButton,
-  Tooltip
+  Tooltip,
 } from '@mui/material'
 import {
   NavigateBefore as PrevIcon,
   NavigateNext as NextIcon,
   Check as CheckIcon,
   KeyboardReturn as GoIcon,
-  Calculate as CalculatorIcon
+  Calculate as CalculatorIcon,
+  OutlinedFlag as Flag,
+  AssistantPhoto as SelectedFlag,
+  FlagCircle
 } from '@mui/icons-material'
 import 'katex/dist/katex.min.css'
 import Latex from 'react-latex-next'
 import DesmosCalculator from './DesmosCalculator'
+import FlaggedQuestionsPanel from './FlaggedQuestionsPanel'
 import questionsData from '../data/questions.json'
 
 interface Question {
@@ -63,6 +67,7 @@ const formatQuestionText = (text: string): string => {
 }
 
 const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
+  const [flaggedQuestions, setFlaggedQuestions] = useState<Set<string>>(new Set())
   const [questions, setQuestions] = useState<Question[]>([])
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [selectedAnswer, setSelectedAnswer] = useState('')
@@ -70,7 +75,7 @@ const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
   const [error, setError] = useState('')
   const [jumpToQuestion, setJumpToQuestion] = useState('')
   const [showCalculator, setShowCalculator] = useState(false)
-
+  const [showFlaggedPanel, setShowFlaggedPanel] = useState(false)
   useEffect(() => {
     try {
       const subjectQuestions = questionsData[subject]
@@ -130,10 +135,22 @@ const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
     setError('')
   }
 
+  const toggleFlag = (questionId: string) => {
+  setFlaggedQuestions(prev => {
+    const newSet = new Set(prev)
+    if (newSet.has(questionId)) {
+      newSet.delete(questionId)
+    } else {
+      newSet.add(questionId)
+    }
+    return newSet
+  })
+}
+  //    AI CODE
   if (error) {
     return <Alert severity="error" sx={{ mb: 2 }}>{error}</Alert>
   }
-
+  //    END AI CODE (SO SORRY)
   if (!currentQuestion) {
     return (
       <Box display="flex" justifyContent="center" p={4}>
@@ -149,7 +166,17 @@ const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
           Question {currentQuestionIndex + 1} of {questions.length}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {subject === 'math' && (
+        <Tooltip title={flaggedQuestions.has(currentQuestion.id) ? "Unflag Question" : "Flag Question"}>
+          <IconButton 
+            onClick={() => toggleFlag(currentQuestion.id)}
+            color={flaggedQuestions.has(currentQuestion.id) ? 'error' : 'default'}
+            size="small"
+          >
+            {flaggedQuestions.has(currentQuestion.id) ? <SelectedFlag /> : <Flag />}
+          </IconButton>
+        </Tooltip>
+
+        {subject === 'math' && (
             <Tooltip title="Toggle Calculator">
               <IconButton
                 onClick={() => setShowCalculator(prev => !prev)}
@@ -180,15 +207,15 @@ const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
               style: { width: '80px' }
             }}
           />
-          <Tooltip title="Go to question">
+          <Tooltip title="View Flagged Questions">
             <IconButton
-              onClick={handleJumpToQuestion}
-              color="primary"
+              onClick={() => setShowFlaggedPanel(true)}
+              color="secondary"
               size="small"
             >
-              <GoIcon />
-            </IconButton>
-          </Tooltip>
+            <FlagCircle />
+          </IconButton>
+        </Tooltip> 
         </Box>
       </Box>
       <Typography variant="subtitle1" color="text.secondary" gutterBottom>
@@ -300,8 +327,22 @@ const QuestionDisplay = ({ subject }: QuestionDisplayProps) => {
       {subject === 'math' && (
         <DesmosCalculator onClose={() => setShowCalculator(false)} isOpen={showCalculator} />
       )}
+      <FlaggedQuestionsPanel
+  open={showFlaggedPanel}
+  onClose={() => setShowFlaggedPanel(false)}
+  flaggedQuestions={flaggedQuestions}
+  questions={questions}
+  onSelectQuestion={(index) => {
+    setCurrentQuestionIndex(index)
+    setSelectedAnswer('')
+    setShowExplanation(false)
+  }}
+    />
     </Paper>
+    
   )
 }
+
+
 
 export default QuestionDisplay 
